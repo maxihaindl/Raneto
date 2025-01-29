@@ -1,11 +1,13 @@
 function build_nested_pages(pages) {
-  var result = [];
-  var i = pages.length;
+  const result = [];
+  let i = pages.length;
 
   while (i--) {
     if (pages[i].slug.split('/').length > 1) {
-      var parent = find_by_slug(pages, pages[i]);
-      parent.files.unshift(pages[i]);
+      const parent = find_by_slug(pages, pages[i]);
+      if (parent) {
+        parent.files.unshift(pages[i]);
+      }
     } else {
       result.unshift(pages[i]);
     }
@@ -16,9 +18,9 @@ function build_nested_pages(pages) {
 
 function find_by_slug(pages, page) {
   return pages.find(
-    (element) => element.slug === page.slug.split('/').slice(0, -1).join('/')
+    (element) => element.slug === page.slug.split('/').slice(0, -1).join('/'),
   );
 }
 
 // Exports
-module.exports = build_nested_pages;
+export default build_nested_pages;

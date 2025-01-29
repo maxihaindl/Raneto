@@ -1,23 +1,24 @@
 // Modules
-var path = require('path');
+import path from 'node:path';
 
 // Which Theme to Use?
 //
 // Local Directory Example (for development or custom themes)
-// var theme_dir = path.join(__dirname, 'themes');
-// var theme_name = 'my-theme-directory';
+// const theme_dir = path.join(__dirname, 'themes');
+// const theme_name = 'my-theme-directory';
 //
 // Themes from NPM
 // use "dist" as the theme name for modules (for now)
-var theme_dir = path.join(
+const __dirname = import.meta.dirname;
+const theme_dir = path.join(
   __dirname,
   '..',
   'node_modules',
-  '@raneto/theme-default'
+  '@raneto/theme-default',
 );
-var theme_name = 'dist';
+const theme_name = 'dist';
 
-var config = {
+const config = {
   // Your site title (format: page_title - site_title)
   site_title: 'Raneto Docs',
 
@@ -42,7 +43,7 @@ var config = {
   support_email: '',
 
   // Footer Text / Copyright
-  copyright: `Copyright &copy; ${new Date().getFullYear()} - <a href="https://raneto.com">Powered by Raneto</a>`,
+  copyright: `Copyright &copy; ${new Date().getFullYear()} - <a href="https://raneto.com" target="_blank">Powered by Raneto</a>`,
 
   // Excerpt length (used in search)
   excerpt_length: 400,
@@ -58,6 +59,10 @@ var config = {
   // Controls behavior of home page if meta ShowOnHome is not present. If set to true
   // all categories or files that do not specify ShowOnHome meta property will be shown
   show_on_home_default: true,
+
+  // Controls behavior of the menu if meta ShowOnMenu is not present. If set to true
+  // all categories or files that do not specify ShowOnMenu meta property will be shown
+  show_on_menu_default: true,
 
   // Theme (see top of file)
   theme_dir,
@@ -167,4 +172,4 @@ var config = {
 };
 
 // Exports
-module.exports = config;
+export default config;

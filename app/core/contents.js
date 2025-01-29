@@ -1,17 +1,19 @@
-const path = require('path');
-const fs = require('fs-extra');
-const { glob } = require('glob')
-const _ = require('underscore');
-const _s = require('underscore.string');
-const yaml = require('js-yaml');
-const utils = require('./utils');
-const contentProcessors = require('../functions/contentProcessors');
+import path from 'node:path';
+import fs from 'fs-extra';
+import { glob } from 'glob';
+import _ from 'underscore';
+import _s from 'underscore.string';
+import yaml from 'js-yaml';
+import utils from './utils.js';
+import content_processors from '../functions/content_processors.js';
 
+// TODO: Scan on start/change, not on every request
 async function handler(activePageSlug, config) {
   activePageSlug = activePageSlug || '';
   const baseSlug = activePageSlug.split(/[\\/]/).slice(0, -1).join('/');
   const contentDir = utils.normalizeDir(path.normalize(config.content_dir));
 
+  // TODO: Fix extra trailing /
   const files = await glob(`${contentDir}**/*`);
   const filesProcessed = [];
 
@@ -19,6 +21,7 @@ async function handler(activePageSlug, config) {
     slug: '.',
     title: '',
     show_on_home: true,
+    show_on_menu: true,
     is_index: true,
     active: baseSlug === '',
     class: 'category-index',
@@ -28,8 +31,8 @@ async function handler(activePageSlug, config) {
 
   const results = await Promise.all(
     files.map((filePath) =>
-      processFile(config, activePageSlug, contentDir, filePath)
-    )
+      processFile(config, activePageSlug, contentDir, filePath),
+    ),
   );
 
   for (const result of results) {
@@ -69,7 +72,7 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
 
     const ignoreExists = await fs.lstat(ignoreFile).then(
       (stat) => stat.isFile(),
-      () => {}
+      () => {},
     );
     if (ignoreExists) {
       if (config.debug) {
@@ -82,10 +85,10 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
     let dirMetadata = {};
     try {
       const metaFile = await fs.readFile(
-        path.join(contentDir, shortPath, 'meta')
+        path.join(contentDir, shortPath, 'meta'),
       );
-      dirMetadata = contentProcessors.cleanObjectStrings(
-        yaml.load(metaFile.toString('utf-8'))
+      dirMetadata = content_processors.cleanObjectStrings(
+        yaml.load(metaFile.toString('utf-8')),
       );
     } catch (e) {
       if (config.debug) {
@@ -96,7 +99,7 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
     if (category_sort && !dirMetadata.sort) {
       try {
         const sortFile = await fs.readFile(
-          path.join(contentDir, shortPath, 'sort')
+          path.join(contentDir, shortPath, 'sort'),
         );
         sort = parseInt(sortFile.toString('utf-8'), 10);
       } catch (e) {
@@ -115,8 +118,11 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
         : config.show_on_home_default,
       is_index: false,
       is_directory: true,
+      show_on_menu: dirMetadata.show_on_menu
+        ? dirMetadata.show_on_menu === 'true'
+        : config.show_on_menu_default,
       active: activePageSlug.startsWith(`/${fileSlug}`),
-      class: `category-${contentProcessors.cleanString(fileSlug)}`,
+      class: `category-${content_processors.cleanString(fileSlug)}`,
       sort: dirMetadata.sort || sort,
       description: dirMetadata.description || '',
       files: [],
@@ -135,7 +141,7 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
 
       slug = slug.replace('.md', '').trim();
 
-      const meta = contentProcessors.processMeta(file.toString('utf-8'));
+      const meta = content_processors.processMeta(file.toString('utf-8'));
 
       if (page_sort_meta && meta[page_sort_meta]) {
         pageSort = parseInt(meta[page_sort_meta], 10);
@@ -143,11 +149,14 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
 
       return {
         slug,
-        title: meta.title ? meta.title : contentProcessors.slugToTitle(slug),
+        title: meta.title ? meta.title : content_processors.slugToTitle(slug),
         show_on_home: meta.show_on_home
           ? meta.show_on_home === 'true'
           : config.show_on_home_default,
         is_directory: false,
+        show_on_menu: meta.show_on_menu
+          ? meta.show_on_menu === 'true'
+          : config.show_on_menu_default,
         active: activePageSlug.trim() === `/${slug}`,
         sort: pageSort,
       };
@@ -159,5 +168,4 @@ async function processFile(config, activePageSlug, contentDir, filePath) {
   }
 }
 
-exports.default = handler;
-module.exports = exports.default;
+export default handler;

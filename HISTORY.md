@@ -1,6 +1,30 @@
 
 # Raneto Changelog
 
+RELEASE TBD / v0.18.0
+=====================
+This is a modernization refactor.
+  * **[Breaking]** Minimum Node.js is v22.x LTS
+  * **[Breaking]** Rename branch to "main" from "master"
+  * **[Breaking]** Packages removed: `pm2`, `commander`, `tail`, `serve-favicon`
+  * **[Breaking]** `bin/raneto` removed as it is out of scope. Please do not use PM2 and instead use `npm start`, containers, systemd, etc.
+  * **[BREAKING]** Modernizing, moving to ESModules, `require => import`, `const/let`, `node:` import prefix, `module.exports => export`, `'use strict';` etc.
+  * **[Misc]** Dependency upgrades
+  * **[Fix]** Windows support (mainline versions only)
+  * STRETCH CI GitHub Actions tests on branches/forks
+  * STRETCH CI GitHub Actions container build
+
+2024.02.22 / v0.17.8
+====================
+  * **[New]** ShowOnMenu by @mgdesign #388
+  * **[Misc]** Upgrading to latest Node.js LTS v18.x and v20.x
+  * **[Misc]** Linting / Prettier
+
+2024.02.21 / v0.17.7
+====================
+  * **[Fix]** Markdown content parser/sanitization (https://github.com/ryanlelek/Raneto/commit/863aaf5095010e1013715e16e4fd474166c2591a)
+  * **[Misc]** Dependency upgrades (https://github.com/ryanlelek/Raneto/commit/ed4f09780539644ac82b7767f911a061c7395d40)
+
 2023.11.05 / v0.17.6
 ====================
   * **[Misc]** Dependency upgrades

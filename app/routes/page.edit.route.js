@@ -1,16 +1,16 @@
 // Modules
-var fs = require('fs-extra');
-var validator = require('validator');
-var get_filepath = require('../functions/get_filepath.js');
-var create_meta_info = require('../functions/create_meta_info.js');
+import fs from 'fs-extra';
+import get_filepath from '../functions/get_filepath.js';
+import create_meta_info from '../functions/create_meta_info.js';
+import sanitize_markdown from '../functions/sanitize_markdown.js';
 
 function route_page_edit(config) {
   return async function (req, res) {
-    var file_category;
-    var file_name;
+    let file_category = '';
+    let file_name = '';
 
     // Handle category in file path
-    var req_file = req.body.file.split('/');
+    const req_file = req.body.file.split('/');
     if (req_file.length > 2) {
       file_category = req_file[1];
       file_name = req_file[2];
@@ -20,7 +20,7 @@ function route_page_edit(config) {
 
     // Generate Filepath
     // Sanitized within function
-    var filepath = get_filepath({
+    let filepath = get_filepath({
       content: config.content_dir,
       category: file_category,
       filename: file_name,
@@ -34,21 +34,16 @@ function route_page_edit(config) {
 
     // Create content including meta information (i.e. title, description, sort)
     function create_content(body) {
-      var meta = create_meta_info(
+      const meta = create_meta_info(
         body.meta_title,
         body.meta_description,
-        body.meta_sort
+        body.meta_sort,
       );
       return meta + body.content;
     }
 
-    var complete_content = create_content(req.body);
-
-    // Sanitize Content
-    // This will disallow <script> and <style> embeds
-    // because output will be HTML-encoded.
-    // If you need images, links, etc. use the Markdown format (see docs)
-    var sanitized_content = validator.escape(complete_content);
+    const complete_content = create_content(req.body);
+    const sanitized_content = sanitize_markdown(complete_content);
 
     try {
       await fs.writeFile(filepath, sanitized_content);
@@ -67,4 +62,4 @@ function route_page_edit(config) {
 }
 
 // Exports
-module.exports = route_page_edit;
+export default route_page_edit;
